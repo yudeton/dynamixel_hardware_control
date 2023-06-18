@@ -12,13 +12,20 @@ The `dynamixel_hardware` package is hopefully compatible any configuration of RO
 First [install ROS 2 Humble on Ubuntu 22.04](http://docs.ros.org/en/humble/Installation/Ubuntu-Install-Debians.html). Then follow the instruction below.
 
 ```shell
-$ source /opt/ros/humble/setup.bash
-$ mkdir -p ~/ros/humble && cd ~/ros/humble
-$ git clone https://github.com/errrr0501/dynamixel_hardware.git src
-$ vcs import src < src/dynamixel_control.repos
-$ rosdep install --from-paths src --ignore-src -r -y
-$ colcon build --symlink-install --cmake-args -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
-$ . install/setup.bash
+source /opt/ros/humble/setup.bash
+sudo apt update
+sudo apt install ros-humble-plotjuggler-ros
+pip3 install openpyxl
+pip3 install roboticstoolbox-python==0.11.0
+pip3 install spatialgeometry==0.2.0 && pip3 install spatialmath-python==0.11
+pip3 install colored==1.4.2
+mkdir -p ~/ros/humble && cd ~/ros/humble
+git clone https://github.com/SamKaiYang/dynamixel_hardware_control.git src
+vcs import src < src/dynamixel_control.repos
+rosdep update
+rosdep install --from-paths src --ignore-src -r -y
+colcon build --symlink-install --cmake-args -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+. install/setup.bash
 ```
 
 ## Demo with real ROBOTIS OpenManipulator-X
