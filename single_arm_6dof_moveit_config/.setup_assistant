@@ -1,0 +1,25 @@
+moveit_setup_assistant_config:
+  urdf:
+    package: single_arm_6dof_description
+    relative_path: urdf/single_arm_6dof.urdf.xacro
+  srdf:
+    relative_path: config/single_arm_6dof.srdf
+  package_settings:
+    author_name: TaiTing Tsai
+    author_email: errrr0501done@gmail.com
+    generated_timestamp: 1686123252
+  control_xacro:
+    command:
+      - position
+    state:
+      - position
+      - velocity
+  modified_urdf:
+    xacros:
+      - control_xacro
+  control_xacro:
+    command:
+      - position
+    state:
+      - position
+      - velocity
