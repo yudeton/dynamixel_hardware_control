@@ -17,20 +17,27 @@ class JointTrajectoryActionClient():
         super().__init__()
         self.node = node
         self.point_test_excel = "./src/my_package/traj_excel_30/tested_robot_traj_2_.xlsx"
-        # self.traj_file = ["./src/my_package/traj_excel_30/tested_robot_traj_1_.xlsx",
-        #             "./src/my_package/traj_excel_30/tested_robot_traj_2_.xlsx",
-        #             "./src/my_package/traj_excel_30/tested_robot_traj_3_.xlsx",
-        #             "./src/my_package/traj_excel_30/tested_robot_traj_4_.xlsx",
-        #             "./src/my_package/traj_excel_30/tested_robot_traj_5_.xlsx",
-        #             "./src/my_package/traj_excel_30/tested_robot_traj_6_.xlsx",
-        #             "./src/my_package/traj_excel_30/tested_robot_traj_7_.xlsx"]
-        self.traj_file = ["./src/my_package/traj_excel_10/tested_robot_traj_1_.xlsx",
-                    "./src/my_package/traj_excel_10/tested_robot_traj_2_.xlsx",
-                    "./src/my_package/traj_excel_10/tested_robot_traj_3_.xlsx",
-                    "./src/my_package/traj_excel_10/tested_robot_traj_4_.xlsx",
-                    "./src/my_package/traj_excel_10/tested_robot_traj_5_.xlsx",
-                    "./src/my_package/traj_excel_10/tested_robot_traj_6_.xlsx",
-                    "./src/my_package/traj_excel_10/tested_robot_traj_7_.xlsx"]
+        self.traj_file = ["./src/my_package/traj_excel_30/tested_robot_traj_1_.xlsx",
+                    "./src/my_package/traj_excel_30/tested_robot_traj_2_.xlsx",
+                    "./src/my_package/traj_excel_30/tested_robot_traj_3_.xlsx",
+                    "./src/my_package/traj_excel_30/tested_robot_traj_4_.xlsx",
+                    "./src/my_package/traj_excel_30/tested_robot_traj_5_.xlsx",
+                    "./src/my_package/traj_excel_30/tested_robot_traj_6_.xlsx",
+                    "./src/my_package/traj_excel_30/tested_robot_traj_7_.xlsx"]
+        # self.traj_file = ["./src/my_package/traj_excel_10/tested_robot_traj_1_.xlsx",
+        #             "./src/my_package/traj_excel_10/tested_robot_traj_2_.xlsx",
+        #             "./src/my_package/traj_excel_10/tested_robot_traj_3_.xlsx",
+        #             "./src/my_package/traj_excel_10/tested_robot_traj_4_.xlsx",
+        #             "./src/my_package/traj_excel_10/tested_robot_traj_5_.xlsx",
+        #             "./src/my_package/traj_excel_10/tested_robot_traj_6_.xlsx",
+        #             "./src/my_package/traj_excel_10/tested_robot_traj_7_.xlsx"]
+        # self.traj_file = ["./src/my_package/traj_excel_30_v2/tested_robot_traj_1_.xlsx",
+        #             "./src/my_package/traj_excel_30_v2/tested_robot_traj_2_.xlsx",
+        #             "./src/my_package/traj_excel_30_v2/tested_robot_traj_3_.xlsx",
+        #             "./src/my_package/traj_excel_30_v2/tested_robot_traj_4_.xlsx",
+        #             "./src/my_package/traj_excel_30_v2/tested_robot_traj_5_.xlsx",
+        #             "./src/my_package/traj_excel_30_v2/tested_robot_traj_6_.xlsx",
+        #             "./src/my_package/traj_excel_30_v2/tested_robot_traj_7_.xlsx"]
         self.current_path = curr_path
         self._action_client = ActionClient(self.node, FollowJointTrajectory, '/joint_trajectory_controller/follow_joint_trajectory')
         self.joints = ['joint1','joint2','joint3','joint4','joint5','joint6']

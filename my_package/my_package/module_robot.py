@@ -22,6 +22,7 @@ from openpyxl import load_workbook
 curr_path = os.path.dirname(os.path.abspath(__file__))  # 当前文件所在绝对路径
 # from my_package.
 from robot_communicate.msg import JointTorque
+from roboticstoolbox.robot.Robot import Robot
 
 class modular_robot_6dof(DHRobot):
     def __init__(self):
@@ -89,6 +90,45 @@ class modular_robot_6dof(DHRobot):
 
         # nominal table top picking pose
         self.addconfiguration("qn", np.array([0, 0, 0, 0, 0, 0]))
+class modular_robot_6dof_ets(Robot):
+    def __init__(self):
+
+        links, name, urdf_string, urdf_filepath = self.URDF_read(
+            "./src/single_arm_6dof_description/urdf/single_arm_6dof.urdf.xacro"
+        )
+        # for link in links:
+        #     print(link)
+
+        super().__init__(
+            links,
+            name=name.upper(),
+            manufacturer="Universal Robotics",
+            # gripper_links=links[7],
+            urdf_string=urdf_string,
+            urdf_filepath=urdf_filepath,
+        )
+
+        self.qr = np.array([np.pi, 0, 0, 0, np.pi / 2, 0])
+        self.qz = np.zeros(6)
+
+        self.addconfiguration("qr", self.qr)
+        self.addconfiguration("qz", self.qz)
+
+        # sol=robot.ikine_LM(SE3(0.5, -0.2, 0.2)@SE3.OA([1,0,0],[0,0,-1]))
+        self.addconfiguration_attr(
+            "qn",
+            np.array(
+                [
+                    -7.052413e-01,
+                    3.604328e-01,
+                    -1.494176e00,
+                    1.133744e00,
+                    -7.052413e-01,
+                    0,
+                ]
+            ),
+        )
+        self.addconfiguration_attr("q1", [0, -np.pi / 2, np.pi / 2, 0, np.pi / 2, 0])
 
 class RobotSubscriber(Node):
 
@@ -122,10 +162,18 @@ class RobotSubscriber(Node):
         current_position = msg.position
         current_velocity = msg.velocity
         current_time = self.get_clock().now()
+        # print("current_time:", current_time)
+        # TODO: 計算動力學扭矩
+            # 位置切換回
+        current_position = [-msg.position[0], -(msg.position[1]+1.57), msg.position[2], -(msg.position[3]+1.57), -msg.position[4], msg.position[5]]
+        current_velocity = [-msg.velocity[0], -(msg.velocity[1]), msg.velocity[2], -(msg.velocity[3]), -msg.velocity[4], msg.velocity[5]]
+            # 速度 正負
+            # 加速度正負
         # 计算加速度
         if self.previous_position is not None and self.previous_velocity is not None:
             # 获取时间步长
             time_step = (current_time - self.previous_time).nanoseconds / 1e9
+            # print("time_step:", time_step)
             # 计算位置变化率
             position_change = [
                 (current_position[i] - self.previous_position[i]) / time_step
@@ -141,15 +189,9 @@ class RobotSubscriber(Node):
                 (velocity_change[i] - self.previous_velocity[i]) / time_step
                 for i in range(len(velocity_change))
             ]
-            # print(time_step)
-            # 输出加速度
-            # print("Acceleration:", acceleration)
-            # TODO: 計算動力學扭矩
-            # print(type(msg.position))
-            # self.joint_torque_msg.torques = self.robot.rne(msg.position.tolist(),msg.velocity.tolist(),acceleration)
-            torque = self.robot.rne(msg.position.tolist(),msg.velocity.tolist(),acceleration)
-            # print("torque:",type(torque.tolist()))
-            # self.joint_torque_msg.torques = self.robot.rne([0.0,0.0,0.0,0.0,0.0,0.0],[0.0,0.0,0.0,0.0,0.0,0.0],acceleration)
+            # torque = self.robot.rne(msg.position.tolist(),msg.velocity.tolist(),acceleration)
+            torque = self.robot.rne(current_position,current_velocity,[0,0,0,0,0,0])
+
             self.joint_torque_msg.torques = torque.tolist()
             # 发布关节扭矩消息
             self.torque_publisher.publish(self.joint_torque_msg)
@@ -163,6 +205,7 @@ class RobotSubscriber(Node):
 def main(args=None):
     rclpy.init(args=args)
     robot = modular_robot_6dof()
+    # robot_ets = modular_robot_6dof_ets()
     robot_subscriber = RobotSubscriber(robot)
     
     # robot.teach()
