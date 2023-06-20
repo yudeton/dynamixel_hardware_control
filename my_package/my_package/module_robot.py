@@ -43,8 +43,8 @@ class modular_robot_6dof(DHRobot):
         a = [0, 0.26754, 0.23246, 0, 0, 0] 
         d = [0.176, 0, 0, 0.0806, 0.0806, 0.0549999394444907]
         alpha = [pi/2, 0, zero, pi/2, -pi/2, zero]
-        mass = [0.93428, 1.4067641114285714, 1.1306573171428573, 0.36924, 0.36821, 0.0259770442543706]
-        
+        # mass = [0.93428, 1.4067641114285714, 1.1306573171428573, 0.36924, 0.36821, 0.0259770442543706]
+        mass = [0.93428, 1.07602, 1.00039, 0.36924, 0.36821, 0.0259770442543706]
         G= [-80,-80,-80,-50,-50,-50]   # gear ratio
         G= [-1,-1,-1,-1,-1,-1]   # gear ratio
         B = 10.0
@@ -139,15 +139,18 @@ class RobotSubscriber(Node):
             '/joint_states',
             self.listener_callback,
             10)
+        
         self.robot = robot
         # 在初始化函数中创建发布者
         self.torque_publisher = self.create_publisher(JointTorque, 'joint_torque_topic', 10)
 
         # 在适当的地方获取关节扭矩信息，并发布消息
         self.joint_torque_msg = JointTorque()
-        self.joint_torque_msg.joint_names = ['joint1', 'joint2', 'joint3', 'joint4', 'joint5', 'joint6']
+        self.joint_torque_msg.sim_joint_names = ['joint1', 'joint2', 'joint3', 'joint4', 'joint5', 'joint6']
         self.joint_torque_msg.torques = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
-
+        self.joint_torque_msg.real_current = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+        self.joint_torque_msg.real_joint_names = ['joint1', 'joint2', 'joint3', 'joint4', 'joint5', 'joint6']
+        self.joint_torque_msg.pub_position = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
         # 发布关节扭矩消息
         self.torque_publisher.publish(self.joint_torque_msg)
         # 上一次关节状态的变量
@@ -156,19 +159,39 @@ class RobotSubscriber(Node):
         self.subscription  # prevent unused variable warning
 
     def listener_callback(self, msg):
-        # self.get_logger().info('I heard: "%s"' % msg.position)
-        # self.get_logger().info('I heard: "%s"' % msg.velocity)
+        # TODO: fixed sub joint name 順序
+        # 按照特定的顺序调整关节数据
+        # 获取关节名称列表
+        joint_names = msg.name
+        desired_order = ['joint1', 'joint2', 'joint3', 'joint4', 'joint5', 'joint6']
+        ordered_positions = []
+        ordered_velocities = []
+        ordered_effort = []
+        for joint_name in desired_order:
+            if joint_name in joint_names:
+                index = joint_names.index(joint_name)
+                ordered_positions.append(msg.position[index])
+                ordered_velocities.append(msg.velocity[index])
+                ordered_effort.append(msg.effort[index])
+            else:
+                self.get_logger().info("Joint {} not found in joint_state message.".format(joint_name))
         # 获取当前的关节状态
-        current_position = msg.position
-        current_velocity = msg.velocity
+        current_name = desired_order
+        current_position = ordered_positions
+        current_velocity = ordered_velocities
+        current_effort = ordered_effort
         current_time = self.get_clock().now()
         # print("current_time:", current_time)
         # TODO: 計算動力學扭矩
             # 位置切換回
-        current_position = [-msg.position[0], -(msg.position[1]+1.57), msg.position[2], -(msg.position[3]+1.57), -msg.position[4], msg.position[5]]
-        current_velocity = [-msg.velocity[0], -(msg.velocity[1]), msg.velocity[2], -(msg.velocity[3]), -msg.velocity[4], msg.velocity[5]]
+        # current_position = [-msg.position[0], -(msg.position[1]+1.57), msg.position[2], -(msg.position[3]+1.57), -msg.position[4], msg.position[5]]
+        # current_velocity = [-msg.velocity[0], -(msg.velocity[1]), msg.velocity[2], -(msg.velocity[3]), -msg.velocity[4], msg.velocity[5]]
             # 速度 正負
             # 加速度正負
+        
+        current_position = [current_position[0], current_position[1], -current_position[2], current_position[3], current_position[4], current_position[5]]
+        current_velocity = [current_velocity[0], current_velocity[1], -current_velocity[2], current_velocity[3], current_velocity[4], current_velocity[5]]
+        # current_effort = [msg.real_current[0], msg.real_current[1], msg.real_current[2], msg.real_current[3], msg.real_current[4], msg.real_current[5]]
         # 计算加速度
         if self.previous_position is not None and self.previous_velocity is not None:
             # 获取时间步长
@@ -190,9 +213,37 @@ class RobotSubscriber(Node):
                 for i in range(len(velocity_change))
             ]
             # torque = self.robot.rne(msg.position.tolist(),msg.velocity.tolist(),acceleration)
-            torque = self.robot.rne(current_position,current_velocity,[0,0,0,0,0,0])
-
-            self.joint_torque_msg.torques = torque.tolist()
+            # torque = self.robot.rne(current_position,current_velocity,[0,0,0,0,0,0])
+            # 斜率: 6.25
+            # 截距: -6.375
+            # 斜率: 6.521739130434783
+            # 截距: -8.130434782608699
+            # 斜率: 4.499999999999998
+            # 截距: -1.4999999999999964
+            # for i in range(len(current_effort)):
+            #     if current_effort[i] < 0.0:
+            #         if i == 0 or i == 1:
+            #             current_effort[i] = -6.25*current_effort[i] + 6.375
+            #         elif i == 2 or i == 3:
+            #             current_effort[i] = -6.521739130434783*current_effort[i] + 8.130434782608699
+            #         elif i == 4 or i == 5:
+            #             current_effort[i] = -4.499999999999998*current_effort[i] + 1.4999999999999964
+            #     elif current_effort[i] > 0.0:
+            #         if i == 0 or i == 1:
+            #             current_effort[i] = 6.25*current_effort[i] - 6.375
+            #         elif i == 2 or i == 3:
+            #             current_effort[i] = 6.521739130434783*current_effort[i] -8.130434782608699
+            #         elif i == 4 or i == 5:
+            #             current_effort[i] = 4.499999999999998*current_effort[i] -1.4999999999999964
+                        
+            torque = self.robot.rne(current_position,current_velocity,acceleration, gravity=[0, 0, -9.81])
+            torque_list = [torque[0],torque[1],-torque[2],torque[3],torque[4],torque[5]]
+            
+            # self.joint_torque_msg.torques = torque.to_list()
+            self.joint_torque_msg.torques = torque_list
+            self.joint_torque_msg.real_current = [current_effort[0],current_effort[1],current_effort[2],current_effort[3],current_effort[4], current_effort[5]]
+            self.joint_torque_msg.real_joint_names = [current_name[0],current_name[1],current_name[2],current_name[3],current_name[4], current_name[5]]
+            self.joint_torque_msg.pub_position = [current_position[0],current_position[1],current_position[2],current_position[3],current_position[4], current_position[5]]
             # 发布关节扭矩消息
             self.torque_publisher.publish(self.joint_torque_msg)
         # 更新上一次的状态
@@ -205,6 +256,9 @@ class RobotSubscriber(Node):
 def main(args=None):
     rclpy.init(args=args)
     robot = modular_robot_6dof()
+    payload = 1.1
+    payload_position = [0, 0, 0.04]
+    robot.payload(payload, payload_position) # set payload
     # robot_ets = modular_robot_6dof_ets()
     robot_subscriber = RobotSubscriber(robot)
     
