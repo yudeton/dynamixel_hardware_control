@@ -241,7 +241,7 @@ class RobotSubscriber(Node):
             
             # self.joint_torque_msg.torques = torque.to_list()
             self.joint_torque_msg.torques = torque_list
-            self.joint_torque_msg.real_current = [current_effort[0],current_effort[1],current_effort[2],current_effort[3],current_effort[4], current_effort[5]]
+            self.joint_torque_msg.real_current = [current_effort[0]*5/4,current_effort[1]*5/4,current_effort[2]*5/4,current_effort[3],current_effort[4], current_effort[5]]
             self.joint_torque_msg.real_joint_names = [current_name[0],current_name[1],current_name[2],current_name[3],current_name[4], current_name[5]]
             self.joint_torque_msg.pub_position = [current_position[0],current_position[1],current_position[2],current_position[3],current_position[4], current_position[5]]
             # 发布关节扭矩消息
