@@ -17,6 +17,7 @@ class JointTrajectoryActionClient():
         super().__init__()
         self.node = node
         self.point_test_excel = "./src/my_package/traj_excel_30/tested_robot_traj_2_.xlsx"
+        # simple point
         # self.traj_file = ["./src/my_package/traj_excel_30/tested_robot_traj_1_.xlsx",
         #             "./src/my_package/traj_excel_30/tested_robot_traj_2_.xlsx",
         #             "./src/my_package/traj_excel_30/tested_robot_traj_3_.xlsx",
@@ -24,13 +25,14 @@ class JointTrajectoryActionClient():
         #             "./src/my_package/traj_excel_30/tested_robot_traj_5_.xlsx",
         #             "./src/my_package/traj_excel_30/tested_robot_traj_6_.xlsx",
         #             "./src/my_package/traj_excel_30/tested_robot_traj_7_.xlsx"]
-        self.traj_file = ["./src/my_package/traj_excel_10/tested_robot_traj_1_.xlsx",
-                    "./src/my_package/traj_excel_10/tested_robot_traj_2_.xlsx",
-                    "./src/my_package/traj_excel_10/tested_robot_traj_3_.xlsx",
-                    "./src/my_package/traj_excel_10/tested_robot_traj_4_.xlsx",
-                    "./src/my_package/traj_excel_10/tested_robot_traj_5_.xlsx",
-                    "./src/my_package/traj_excel_10/tested_robot_traj_6_.xlsx",
-                    "./src/my_package/traj_excel_10/tested_robot_traj_7_.xlsx"]
+        # current test
+        # self.traj_file = ["./src/my_package/traj_excel_10/tested_robot_traj_1_.xlsx",
+        #             "./src/my_package/traj_excel_10/tested_robot_traj_2_.xlsx",
+        #             "./src/my_package/traj_excel_10/tested_robot_traj_3_.xlsx",
+        #             "./src/my_package/traj_excel_10/tested_robot_traj_4_.xlsx",
+        #             "./src/my_package/traj_excel_10/tested_robot_traj_5_.xlsx",
+        #             "./src/my_package/traj_excel_10/tested_robot_traj_6_.xlsx",
+        #             "./src/my_package/traj_excel_10/tested_robot_traj_7_.xlsx"]
         # self.traj_file = ["./src/my_package/traj_excel_30_v2/tested_robot_traj_1_.xlsx",
         #             "./src/my_package/traj_excel_30_v2/tested_robot_traj_2_.xlsx",
         #             "./src/my_package/traj_excel_30_v2/tested_robot_traj_3_.xlsx",
@@ -38,10 +40,23 @@ class JointTrajectoryActionClient():
         #             "./src/my_package/traj_excel_30_v2/tested_robot_traj_5_.xlsx",
         #             "./src/my_package/traj_excel_30_v2/tested_robot_traj_6_.xlsx",
         #             "./src/my_package/traj_excel_30_v2/tested_robot_traj_7_.xlsx"]
+        # complex point
+        self.traj_file = ["./src/my_package/complex_traj_30/tested_robot_traj_1_.xlsx",
+                    "./src/my_package/complex_traj_30/tested_robot_traj_2_.xlsx",
+                    "./src/my_package/complex_traj_30/tested_robot_traj_3_.xlsx",
+                    "./src/my_package/complex_traj_30/tested_robot_traj_4_.xlsx",
+                    "./src/my_package/complex_traj_30/tested_robot_traj_5_.xlsx",
+                    "./src/my_package/complex_traj_30/tested_robot_traj_6_.xlsx",
+                    "./src/my_package/complex_traj_30/tested_robot_traj_7_.xlsx",
+                    "./src/my_package/complex_traj_30/tested_robot_traj_8_.xlsx",
+                    "./src/my_package/complex_traj_30/tested_robot_traj_9_.xlsx"]
         self.current_path = curr_path
         self._action_client = ActionClient(self.node, FollowJointTrajectory, '/joint_trajectory_controller/follow_joint_trajectory')
         self.joints = ['joint1','joint2','joint3','joint4','joint5','joint6']
-        self.goal_positions = [0.202886489675801, 0.002539495620456, -1.379316785363834, 0.188939888900502, 1.570796384046431, -1.367909888287239]
+        # simple point init 
+        # self.goal_positions = [0.202886489675801, 0.002539495620456, -1.379316785363834, 0.188939888900502, 1.570796384046431, -1.367909888287239]
+        
+        self.goal_positions = [0.64418, 2.60806, 2.34224, -2.17341, 0.53269, 0.05171]
         self.goal_positions_traj = [0,0,0,0,0,0]
         self.total_duration_time = 0  # 初始化总的duration_time
         self.tmp_time = 0

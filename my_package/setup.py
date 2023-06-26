@@ -22,6 +22,7 @@ setup(
         (os.path.join('share', package_name, 'urdf'), glob(os.path.join('urdf', '*.urdf'))),
         (os.path.join('share', package_name, 'traj_excel_30_v2'), glob(os.path.join('traj_excel', '*.xlsx'))),
         (os.path.join('share', package_name, 'traj_excel_10_v2'), glob(os.path.join('traj_excel', '*.xlsx'))),
+        (os.path.join('share', package_name, 'complex_traj_30'), glob(os.path.join('traj_excel', '*.xlsx'))),
     ],
     install_requires=['setuptools'],
     zip_safe=True,

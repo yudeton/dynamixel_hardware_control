@@ -27,9 +27,85 @@ rosdep install --from-paths src --ignore-src -r -y
 colcon build --symlink-install --cmake-args -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
 . install/setup.bash
 ```
+## Read Dynamixel motor 
 
-## Demo with real ROBOTIS OpenManipulator-X
+H54-200-S500-R Goal Torque unit 16.11328 [mA]
+H54-100-S500-R Goal Torque unit 16.11328 [mA]
+H42-20-S300-R Goal Torque unit 4.02832 [mA]
 
+# TODO fixed at dynamixel_workbench_toolbox/src/dynamixel_workbench_toolbox/dynamixel_workbench.cpp
+```  
+float DynamixelWorkbench::convertValue2Current(uint8_t id, int16_t value)
+{
+  float current = 0;
+  float CURRENT_UNIT = 2.69f; //Unit : mA, Ref : http://emanual.robotis.com/docs/en/dxl/x/xm430-w350/#goal-current102
+
+  model_info = getModelInfo(id);
+  if (model_info == NULL) return false;
+  CURRENT_UNIT = 16.11328f;
+  // current = (int16_t)value * CURRENT_UNIT;
+  // return current;
+  // if (getProtocolVersion() == 1.0f)
+  // {
+  //   current = (int16_t)value * CURRENT_UNIT;
+  //   return current;
+  // }
+  // else if (getProtocolVersion() == 2.0f)
+  // {
+  //   if (strncmp(getModelName(id), "PRO-L", strlen("PRO-L")) == 0 ||
+  //       strncmp(getModelName(id), "PRO-M", strlen("PRO-M")) == 0 ||
+  //       strncmp(getModelName(id), "PRO-H", strlen("PRO-H")) == 0)
+  //   {
+  //     CURRENT_UNIT = 16.11328f;
+  //     current = (int16_t)value * CURRENT_UNIT;
+  //     return current;
+  //   }
+  //   else if (strncmp(getModelName(id), "PRO-PLUS", strlen("PRO-PLUS")) == 0)
+  //   {
+  //     CURRENT_UNIT = 1.0f;
+  //     current = (int16_t)value * CURRENT_UNIT;
+  //     return current;
+  //   }
+  //   else
+  //   {
+  //     CURRENT_UNIT = 16.11328f;
+  //     current = (int16_t)value * CURRENT_UNIT;
+  //     return current;
+  //   }
+  // }
+
+  current = (int16_t)value * CURRENT_UNIT;
+
+  return current;
+}
+
+float DynamixelWorkbench::convertValue2Current(int16_t value)
+{
+  float current = 0;
+  const float CURRENT_UNIT = 16.11328f; //Unit : mA, Ref : http://emanual.robotis.com/docs/en/dxl/x/xm430-w350/#goal-current102
+  // CURRENT_UNIT = 16.11328f;
+  current = (int16_t)value * CURRENT_UNIT;
+
+  return current;
+}
+```
+## Demo with real robot
+
+## Video can see:
+MoveIt:https://www.youtube.com/watch?v=tgAdRwSPZqU
+Trajectory:https://www.youtube.com/watch?v=KQFqeoA4rBA&feature=youtu.be
+### Demo MoveIt 
+```
+ros2 launch single_arm_6dof_moveit_config demo.launch.py 
+```
+### Demo trajectory
+```
+# open terminal 1
+ros2 launch single_arm_6dof_description single_arm_6dof.launch.py 
+
+# open terminal 2
+ros2 launch my_package traj_action.launch.py 
+```
 ### Configure Dynamixel motor parameters
 
 Update the `usb_port`, `baud_rate`, and `joint_ids` parameters on [`open_manipulator_x_description/urdf/open_manipulator_x.ros2_control.xacro`](https://github.com/youtalk/dynamixel_control/blob/main/open_manipulator_x_description/urdf/open_manipulator_x.ros2_control.xacro#L9-L12) to correctly communicate with Dynamixel motors.
@@ -62,11 +138,11 @@ Start the `joint_trajectory_controller` and send a `/joint_trajectory_controller
 $ ros2 control switch_controllers --activate joint_state_broadcaster --activate joint_trajectory_controller --deactivate velocity_controller
 $ ros2 action send_goal /joint_trajectory_controller/follow_joint_trajectory control_msgs/action/FollowJointTrajectory -f "{
   trajectory: {
-    joint_names: [joint1, joint2, joint3, joint4, gripper],
+    joint_names: [joint1, joint2, joint3, joint4, joint5, joint6],
     points: [
-      { positions: [0.1, 0.1, 0.1, 0.1, 0], time_from_start: { sec: 2 } },
-      { positions: [-0.1, -0.1, -0.1, -0.1, 0], time_from_start: { sec: 4 } },
-      { positions: [0, 0, 0, 0, 0], time_from_start: { sec: 6 } }
+      { positions: [0.1, 0.1, 0.1, 0.1, 0.1, 0.1], time_from_start: { sec: 2 } },
+      { positions: [-0.1, -0.1, -0.1, -0.1, -0.1, -0.1], time_from_start: { sec: 4 } },
+      { positions: [0, 0, 0, 0, 0, 0], time_from_start: { sec: 6 } }
     ]
   }
 }"
