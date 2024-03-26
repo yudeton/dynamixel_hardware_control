@@ -21,7 +21,7 @@ pip3 install spatialgeometry==0.2.0 && pip3 install spatialmath-python==0.11
 pip3 install colored==1.4.2
 mkdir -p ~/ros/humble && cd ~/ros/humble
 git clone https://github.com/SamKaiYang/dynamixel_hardware_control.git src
-vcs import src < src/dynamixel_control.repos
+vcs import src < src/dynamixel_hardware_control/dynamixel_control.repos
 rosdep update
 rosdep install --from-paths src --ignore-src -r -y
 colcon build --symlink-install --cmake-args -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
